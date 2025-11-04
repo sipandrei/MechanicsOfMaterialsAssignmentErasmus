@@ -1,0 +1,70 @@
+% Assignment 1 - Mechanical behaviour of materials - Erasmus - University
+% of Patras - 2025
+% elastic constants = [c11, c12, c44]
+cuElConst(1,1) = 168e6;
+cuElConst(1,2) = 121e6;
+cuElConst(4,4) = 75e6;
+alElConst(1,1) = 108e6;
+alElConst(1,2) = 61e6;
+alElConst(4,4) = 28e6;
+directions = [1,0,0;1,1,0;1,1,1;3,1,1];
+
+% calculating the values for compliance tensors, based on stiffness tensor
+function complianceTensor = ComplianceTensorCreation(elConst)
+    complianceTensor(1,1) = (elConst(1,1) + elConst(1,2)) / ...
+    ((elConst(1,1) - elConst(1,2)) * (elConst(1,1) + 2*elConst(1,2)));
+    complianceTensor(1,2) = -elConst(1,2) / ... 
+        ((elConst(1,1)-elConst(1,2)) * (elConst(1,1) + 2 * elConst(1,2)));
+    complianceTensor(4,4) = 1 / elConst(4,4);
+end
+
+function modulusOfElasticity = ModulusOfElasticityCalc(complTensor, dir)
+    m = dir(1)/sqrt(dir(1)^2+dir(2)^2+dir(3)^2);
+    n = dir(2)/sqrt(dir(1)^2+dir(2)^2+dir(3)^2);
+    p = dir(3)/sqrt(dir(1)^2+dir(2)^2+dir(3)^2);
+    modulusOfElasticity = 1/(complTensor(1,1) -...
+        2 * (complTensor(1,1) - complTensor(1,2) - complTensor(4,4)/2) * ...
+        (m^2 * n^2 + n^2 * p + p^2 * m^2));
+end
+
+function zener = ZenerRatioCalc(elConst)
+    zener = 2*elConst(4,4)/(elConst(1,1)-elConst(1,2));
+end
+
+sCu = ComplianceTensorCreation(cuElConst);
+sAl = ComplianceTensorCreation(alElConst);
+
+% modulus of elasticity column1:Cu, column2:Al
+E = zeros(4,2);
+
+for i=1:4
+    E(i,1) = ModulusOfElasticityCalc(sCu,directions(i,:));
+    E(i,2) = ModulusOfElasticityCalc(sAl,directions(i,:));
+    % disp(directions(i,:));
+    % disp(E(i,:));
+end
+
+tiledlayout(2,1);
+targetStress = 80;%MPa
+ttl = ["Copper","Aluminium"];
+labels = {'100','110','111','311'};
+for i=1:2
+    nexttile
+    hold on;
+    axis padded;
+    title(ttl(i));
+    xlabel("Stress[MPa]");
+    ylabel("Strain");
+    for j=1:4
+        line([0,targetStress],[0,E(j,i)/targetStress]);
+    end   
+    legend(labels);
+    hold off;
+end
+
+zenerCu = ZenerRatioCalc(cuElConst);
+zenerAl = ZenerRatioCalc(alElConst);
+disp(['Copper zener ratio: ',num2str(zenerCu)]);
+disp(['Aluminium zener ratio: ',num2str(zenerAl)]);
+
+
