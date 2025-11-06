@@ -1,5 +1,5 @@
 % Assignment 1 - Mechanical behaviour of materials - Erasmus - University
-% of Patras - 2025
+% of Patras - 2025 - exercise 1
 % elastic constants = [c11, c12, c44]
 cuElConst(1,1) = 168e6;
 cuElConst(1,2) = 121e6;
@@ -67,4 +67,14 @@ zenerAl = ZenerRatioCalc(alElConst);
 disp(['Copper zener ratio: ',num2str(zenerCu)]);
 disp(['Aluminium zener ratio: ',num2str(zenerAl)]);
 
-
+[~,maxEId] = max(E(:,1));
+[~,minEId] = min(E(:,1));
+% we can use the direction vector because it is a cubic structure
+stiffestPlane = directions(maxEId,:);
+leastStiffPlane = directions(minEId, :);
+disp('Stiffest plane:');
+disp(stiffestPlane);
+disp('planar density of 1,1,1 is: 2.3094/a^2');
+disp("Least Stiff Plane");
+disp(leastStiffPlane);
+disp('Planar density of 1,0,0 is: 2/a^2');
